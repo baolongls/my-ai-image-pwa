@@ -15,7 +15,9 @@
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2839829453657935"
      crossorigin="anonymous"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
+    <!-- Bạn sẽ lấy mã này từ tài khoản AdSense của mình (phần 'Quảng cáo tự động' -> 'Lấy mã') -->
+    <!-- Mã sẽ trông tương tự như dòng dưới đây, nhưng có thể có thêm các thuộc tính khác -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ADSENSE_PUBLISHER_ID" crossorigin="anonymous"></script>
     <!------------------------------------------------------------------------>
 
     <style>
@@ -80,7 +82,8 @@
             opacity: 1;
             transform: translateY(0);
         }
-        /* Style for ad placeholders */
+        /* Ad placeholders are now removed, so this style is no longer strictly necessary,
+           but kept for consistency if you decide to add them back later. */
         .ad-placeholder {
             background-color: #e0e7ff; /* Light blue */
             border: 1px dashed #6366f1; /* Blue dashed border */
@@ -105,7 +108,7 @@
 
         <!-- Prompt Input -->
         <div class="mb-4">
-            <label for="prompt" class="block text-sm font-medium text-gray-700 mb-1">Your description (any language):</label>
+            <label for="prompt" class="block text-sm font-medium text-gray-700 mb-1">Your description:</label>
             <textarea id="prompt" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Example: an astronaut cat riding a horse on Mars"></textarea>
         </div>
 
@@ -136,13 +139,8 @@
             <span id="btn-text">Generate Image</span>
         </button>
 
-        <!-- Vị trí đặt quảng cáo 1: Có thể là một banner lớn -->
-        <!-- LỰA CHỌN 1: Giữ lại div.ad-placeholder nhưng xóa nội dung bên trong -->
-        <div class="ad-placeholder">
-            <!-- Google AdSense Auto Ads sẽ tự động đặt quảng cáo vào đây nếu thấy phù hợp -->
-        </div>
-        <!-- LỰA CHỌN 2: Xóa toàn bộ div.ad-placeholder này nếu bạn muốn -->
-        <!-- <div class="ad-placeholder"></div> -->
+        <!-- Ad placeholders have been removed as per user request.
+             Google AdSense Auto Ads will now determine optimal ad placement. -->
 
         <!-- Result Section -->
         <div class="mt-6">
@@ -159,14 +157,6 @@
                 <p id="errorDetails" class="text-sm text-gray-500 mt-1"></p>
             </div>
         </div>
-
-        <!-- Vị trí đặt quảng cáo 2: Có thể là một quảng cáo hình vuông hoặc nội dung -->
-        <!-- LỰA CHỌN 1: Giữ lại div.ad-placeholder nhưng xóa nội dung bên trong -->
-        <div class="ad-placeholder">
-            <!-- Google AdSense Auto Ads sẽ tự động đặt quảng cáo vào đây nếu thấy phù hợp -->
-        </div>
-        <!-- LỰA CHỌN 2: Xóa toàn bộ div.ad-placeholder này nếu bạn muốn -->
-        <!-- <div class="ad-placeholder"></div> -->
 
     </div>
 
@@ -209,46 +199,14 @@
         const errorDetails = document.getElementById('errorDetails');
         const customMessageDiv = document.getElementById('customMessage'); 
 
-        // VERY IMPORTANT: THIS API KEY IS USED FOR BOTH TRANSLATION AND IMAGE GENERATION
+        // VERY IMPORTANT: THIS API KEY IS USED FOR IMAGE GENERATION
         // DO NOT PUT YOUR API KEY DIRECTLY IN FRONTEND CODE WHEN DEPLOYING PUBLICLY!
         // For security, you should use a small backend server to make this API call.
         // The backend server will securely store your API Key and return only the result to the frontend.
-        const aiApiKey = "AIzaSyBzXs5QUpqGbkLty6Z41tQTPdNUS8aiIH0"; // <--- REPLACE WITH YOUR ACTUAL API KEY FROM GOOGLE CLOUD OR GEMINI API
+        const aiApiKey = "AIzaSyBzXs5QUpqGbkLty6Z41tQTPdNUS8aiIH0"; // <--- REPLACE WITH YOUR ACTUAL API KEY FROM GOOGLE CLOUD OR IMAGEN API (no longer Generative Language API for translation)
 
-        // Function to translate prompt to English
-        async function translatePrompt(text) {
-            try {
-                const chatHistory = [{ role: "user", parts: [{ text: `Translate the following text to English, return only the translation, no other text: "${text}"` }] }];
-                const payload = { contents: chatHistory };
-                
-                // Using gemini-2.0-flash for translation
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${aiApiKey}`;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || `Translation HTTP error: ${response.status}`);
-                }
-
-                const result = await response.json();
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    return result.candidates[0].content.parts[0].text;
-                } else {
-                    throw new Error('No translation received from AI. Invalid response.');
-                }
-            } catch (error) {
-                console.error('Error translating prompt:', error);
-                showError(`Translation error: ${error.message}. Please try again in English or with a simpler description.`);
-                return null; // Return null if translation fails
-            }
-        }
+        // Function to translate prompt has been removed as per user request.
+        // The API will now receive the prompt directly in the language provided by the user.
 
         // Generate Button Click Listener
         generateBtn.addEventListener('click', async () => {
@@ -260,27 +218,23 @@
 
             setLoadingState(true);
 
-            // Translate prompt to English
-            const translatedPrompt = await translatePrompt(prompt);
-            if (!translatedPrompt) {
-                setLoadingState(false);
-                return; // Stop if translation fails
-            }
-            showCustomMessage('Translating description and generating image...'); // Inform user about translation process
+            // Use the prompt directly without translation
+            const finalPrompt = prompt; 
 
             const imageCount = parseInt(imageCountSelect.value, 10);
             const aspectRatio = aspectRatioSelect.value;
-            let finalPrompt = translatedPrompt; // Use the translated prompt
-
+            
+            // Adjust prompt based on aspect ratio
+            let adjustedPrompt = finalPrompt;
             if (aspectRatio === '9:16') {
-                finalPrompt = `portrait orientation, ${translatedPrompt}`;
+                adjustedPrompt = `portrait orientation, ${finalPrompt}`;
             } else if (aspectRatio === '16:9') {
-                finalPrompt = `landscape orientation, cinematic, ${translatedPrompt}`;
+                adjustedPrompt = `landscape orientation, cinematic, ${finalPrompt}`;
             }
 
             try {
                 const payload = {
-                    instances: [{ prompt: finalPrompt }],
+                    instances: [{ prompt: adjustedPrompt }], // Use the adjusted prompt
                     parameters: { "sampleCount": imageCount }
                 };
                 
