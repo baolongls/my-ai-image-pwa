@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Image Generator</title>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2839829453657935"
-     crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,6 +12,11 @@
     <link rel="manifest" href="/manifest.json">
     <!-- PWA: Meta tag for app theme color -->
     <meta name="theme-color" content="#2563eb"/> 
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2839829453657935"
+     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
+    <!------------------------------------------------------------------------>
 
     <style>
         body {
@@ -133,7 +136,14 @@
             <span id="btn-text">Generate Image</span>
         </button>
 
-       
+        <!-- Vị trí đặt quảng cáo 1: Có thể là một banner lớn -->
+        <!-- LỰA CHỌN 1: Giữ lại div.ad-placeholder nhưng xóa nội dung bên trong -->
+        <div class="ad-placeholder">
+            <!-- Google AdSense Auto Ads sẽ tự động đặt quảng cáo vào đây nếu thấy phù hợp -->
+        </div>
+        <!-- LỰA CHỌN 2: Xóa toàn bộ div.ad-placeholder này nếu bạn muốn -->
+        <!-- <div class="ad-placeholder"></div> -->
+
         <!-- Result Section -->
         <div class="mt-6">
             <div id="loader" class="hidden text-center py-8">
@@ -149,6 +159,14 @@
                 <p id="errorDetails" class="text-sm text-gray-500 mt-1"></p>
             </div>
         </div>
+
+        <!-- Vị trí đặt quảng cáo 2: Có thể là một quảng cáo hình vuông hoặc nội dung -->
+        <!-- LỰA CHỌN 1: Giữ lại div.ad-placeholder nhưng xóa nội dung bên trong -->
+        <div class="ad-placeholder">
+            <!-- Google AdSense Auto Ads sẽ tự động đặt quảng cáo vào đây nếu thấy phù hợp -->
+        </div>
+        <!-- LỰA CHỌN 2: Xóa toàn bộ div.ad-placeholder này nếu bạn muốn -->
+        <!-- <div class="ad-placeholder"></div> -->
 
     </div>
 
@@ -203,6 +221,7 @@
                 const chatHistory = [{ role: "user", parts: [{ text: `Translate the following text to English, return only the translation, no other text: "${text}"` }] }];
                 const payload = { contents: chatHistory };
                 
+                // Using gemini-2.0-flash for translation
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${aiApiKey}`;
                 
                 const response = await fetch(apiUrl, {
@@ -265,6 +284,7 @@
                     parameters: { "sampleCount": imageCount }
                 };
                 
+                // Using imagen-3.0-generate-002 for image generation
                 const imageUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${aiApiKey}`;
 
                 const response = await fetch(imageUrl, {
