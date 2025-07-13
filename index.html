@@ -95,23 +95,7 @@
         
         <div class="text-center mb-6">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900">AI Image Generator</h1>
-            <p class="mt-2 text-gray-600">Generate AI images, sign in with your Google account!</p>
-        </div>
-
-        <!-- Firebase Auth UI -->
-        <div id="auth-status" class="text-center mb-6">
-            <div id="user-info" class="hidden">
-                <p class="text-gray-700 mb-2">Welcome, <span id="user-display-name" class="font-semibold"></span>!</p>
-                <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
-                </button>
-            </div>
-            <div id="login-prompt">
-                <p class="text-gray-700 mb-2">Please sign in to use the image generator.</p>
-                <button id="google-signin-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center mx-auto">
-                    <i class="fab fa-google mr-2"></i>Sign in with Google
-                </button>
-            </div>
+            <p class="mt-2 text-gray-600">Generate AI images easily!</p>
         </div>
 
         <!-- Prompt Input -->
@@ -198,11 +182,6 @@
     <!-- Custom Message Box -->
     <div id="customMessage" class="custom-message hidden"></div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
     <script>
         // PWA: Register Service Worker
         if ('serviceWorker' in navigator) {
@@ -217,23 +196,6 @@
             });
         }
         
-
-        // Your Firebase configuration
-        // YOU NEED TO REPLACE THESE VALUES WITH YOUR ACTUAL FIREBASE PROJECT CONFIGURATION
-        const firebaseConfig = {
-            apiKey: "AIzaSyA3qwF_UuXMr4Dm2xPhJIAJxE1ECEnTQ8s", // This is your Firebase API Key, NOT the AI API Key
-            authDomain: "myaigenapp.firebaseapp.com",
-            projectId: "myaigenapp",
-            storageBucket: "myaigenapp.firebasestorage.app",
-            messagingSenderId: "457088629641",
-            appId: "1:457088629641:web:332293058a167763ce3f58"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore(); // Initialize Firestore, useful for storing user data
-
         // Get UI elements
         const generateBtn = document.getElementById('generateBtn');
         const btnText = document.getElementById('btn-text');
@@ -246,17 +208,11 @@
         const errorDetails = document.getElementById('errorDetails');
         const customMessageDiv = document.getElementById('customMessage'); 
 
-        const googleSignInBtn = document.getElementById('google-signin-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userInfoDiv = document.getElementById('user-info');
-        const loginPromptDiv = document.getElementById('login-prompt');
-        const userDisplayName = document.getElementById('user-display-name');
-
         // VERY IMPORTANT: THIS API KEY IS USED FOR BOTH TRANSLATION AND IMAGE GENERATION
         // DO NOT PUT YOUR API KEY DIRECTLY IN FRONTEND CODE WHEN DEPLOYING PUBLICLY!
         // For security, you should use a small backend server to make this API call.
         // The backend server will securely store your API Key and return only the result to the frontend.
-        const aiApiKey = AIzaSyBzXs5QUpqGbkLty6Z41tQTPdNUS8aiIH0; // <--- REPLACE WITH YOUR ACTUAL API KEY FROM GOOGLE CLOUD OR GEMINI API
+        const aiApiKey = ""; // <--- REPLACE WITH YOUR ACTUAL API KEY FROM GOOGLE CLOUD OR GEMINI API
 
         // Function to translate prompt to English
         async function translatePrompt(text) {
@@ -292,66 +248,8 @@
             }
         }
 
-
-        // Hide/show UI elements related to image generation when not signed in
-        function updateUIForAuth(user) {
-            if (user) {
-                // User is signed in
-                userInfoDiv.classList.remove('hidden');
-                loginPromptDiv.classList.add('hidden');
-                userDisplayName.textContent = user.displayName || user.email || 'User';
-                generateBtn.disabled = false; // Enable generate button
-                promptInput.disabled = false;
-                imageCountSelect.disabled = false;
-                aspectRatioSelect.disabled = false;
-            } else {
-                // User is not signed in
-                userInfoDiv.classList.add('hidden');
-                loginPromptDiv.classList.remove('hidden');
-                generateBtn.disabled = true; // Disable generate button
-                promptInput.disabled = true;
-                imageCountSelect.disabled = true;
-                aspectRatioSelect.disabled = true;
-                resultGrid.innerHTML = ''; // Clear old results
-                showError('Please sign in to generate images.'); // Show message
-            }
-        }
-
-        // Listen for authentication state changes
-        auth.onAuthStateChanged(user => {
-            updateUIForAuth(user);
-        });
-
-        // Handle Google sign-in
-        googleSignInBtn.addEventListener('click', async () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            try {
-                await auth.signInWithPopup(provider);
-                showCustomMessage('Sign in successful!');
-            } catch (error) {
-                console.error('Google sign-in error:', error);
-                showError(`Sign in failed: ${error.message}`);
-            }
-        });
-
-        // Handle sign-out
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await auth.signOut();
-                showCustomMessage('You have signed out.');
-            } catch (error) {
-                console.error('Sign out error:', error);
-                showError(`Sign out failed: ${error.message}`);
-            }
-        });
-
+        // Generate Button Click Listener
         generateBtn.addEventListener('click', async () => {
-            // Re-check authentication status before generating
-            if (!auth.currentUser) {
-                showCustomMessage('You need to sign in to generate images.');
-                return;
-            }
-
             const prompt = promptInput.value.trim();
             if (!prompt) {
                 showCustomMessage('Please enter a description to generate an image.');
@@ -360,7 +258,7 @@
 
             setLoadingState(true);
 
-            // NEW STEP: Translate prompt to English
+            // Translate prompt to English
             const translatedPrompt = await translatePrompt(prompt);
             if (!translatedPrompt) {
                 setLoadingState(false);
@@ -414,7 +312,7 @@
         });
 
         function setLoadingState(isLoading) {
-            generateBtn.disabled = isLoading || !auth.currentUser; // Disable if loading OR not signed in
+            generateBtn.disabled = isLoading; // Always enabled unless loading
             btnText.textContent = isLoading ? 'Processing...' : 'Generate Image';
             
             if (isLoading) {
