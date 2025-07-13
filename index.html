@@ -13,6 +13,13 @@
     <!-- PWA: Meta tag for app theme color -->
     <meta name="theme-color" content="#2563eb"/> 
 
+    <!-- Dán TOÀN BỘ mã Quảng cáo tự động của Google AdSense vào đây, ngay sau thẻ title -->
+    <!-- Bạn sẽ lấy mã này từ tài khoản AdSense của mình (phần 'Quảng cáo tự động' -> 'Lấy mã') -->
+    <!-- Mã sẽ trông tương tự như dòng dưới đây, nhưng có thể có thêm các thuộc tính khác -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2839829453657935"
+     crossorigin="anonymous"></script>
+    <!------------------------------------------------------------------------>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -100,7 +107,7 @@
 
         <!-- Prompt Input -->
         <div class="mb-4">
-            <label for="prompt" class="block text-sm font-medium text-gray-700 mb-1">Your description (any language):</label>
+            <label for="prompt" class="block text-sm font-medium text-gray-700 mb-1">Your description (English only):</label>
             <textarea id="prompt" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Example: an astronaut cat riding a horse on Mars"></textarea>
         </div>
 
@@ -208,45 +215,14 @@
         const errorDetails = document.getElementById('errorDetails');
         const customMessageDiv = document.getElementById('customMessage'); 
 
-        // VERY IMPORTANT: THIS API KEY IS USED FOR BOTH TRANSLATION AND IMAGE GENERATION
+        // VERY IMPORTANT: THIS API KEY IS USED FOR IMAGE GENERATION
         // DO NOT PUT YOUR API KEY DIRECTLY IN FRONTEND CODE WHEN DEPLOYING PUBLICLY!
         // For security, you should use a small backend server to make this API call.
         // The backend server will securely store your API Key and return only the result to the frontend.
-        const aiApiKey = "AIzaSyBzXs5QUpqGbkLty6Z41tQTPdNUS8aiIH0"; // <--- REPLACE WITH YOUR ACTUAL API KEY FROM GOOGLE CLOUD OR GEMINI API
+        const aiApiKey = "AIzaSyBzXs5QUpqGbkLty6Z41tQTPdNUS8aiIH0"; // <--- REPLACE WITH YOUR ACTUAL API KEY FROM GOOGLE CLOUD OR IMAGEN API
 
-        // Function to translate prompt to English
-        async function translatePrompt(text) {
-            try {
-                const chatHistory = [{ role: "user", parts: [{ text: `Translate the following text to English, return only the translation, no other text: "${text}"` }] }];
-                const payload = { contents: chatHistory };
-                
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${aiApiKey}`;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || `Translation HTTP error: ${response.status}`);
-                }
-
-                const result = await response.json();
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    return result.candidates[0].content.parts[0].text;
-                } else {
-                    throw new Error('No translation received from AI. Invalid response.');
-                }
-            } catch (error) {
-                console.error('Error translating prompt:', error);
-                showError(`Translation error: ${error.message}. Please try again in English or with a simpler description.`);
-                return null; // Return null if translation fails
-            }
-        }
+        // Function to translate prompt has been removed as per user request.
+        // The API will now receive the prompt directly in the language provided by the user.
 
         // Generate Button Click Listener
         generateBtn.addEventListener('click', async () => {
@@ -258,30 +234,27 @@
 
             setLoadingState(true);
 
-            // Translate prompt to English
-            const translatedPrompt = await translatePrompt(prompt);
-            if (!translatedPrompt) {
-                setLoadingState(false);
-                return; // Stop if translation fails
-            }
-            showCustomMessage('Translating description and generating image...'); // Inform user about translation process
+            // Use the prompt directly without translation
+            const finalPrompt = prompt; 
 
             const imageCount = parseInt(imageCountSelect.value, 10);
             const aspectRatio = aspectRatioSelect.value;
-            let finalPrompt = translatedPrompt; // Use the translated prompt
-
+            
+            // Adjust prompt based on aspect ratio
+            let adjustedPrompt = finalPrompt;
             if (aspectRatio === '9:16') {
-                finalPrompt = `portrait orientation, ${translatedPrompt}`;
+                adjustedPrompt = `portrait orientation, ${finalPrompt}`;
             } else if (aspectRatio === '16:9') {
-                finalPrompt = `landscape orientation, cinematic, ${translatedPrompt}`;
+                adjustedPrompt = `landscape orientation, cinematic, ${finalPrompt}`;
             }
 
             try {
                 const payload = {
-                    instances: [{ prompt: finalPrompt }],
+                    instances: [{ prompt: adjustedPrompt }], // Use the adjusted prompt
                     parameters: { "sampleCount": imageCount }
                 };
                 
+                // Using imagen-3.0-generate-002 for image generation
                 const imageUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${aiApiKey}`;
 
                 const response = await fetch(imageUrl, {
